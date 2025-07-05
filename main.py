@@ -1,4 +1,5 @@
-import os, random
+import os
+import random
 
 run = True
 menu = True
@@ -10,6 +11,11 @@ standing = True
 buy = False
 speak = False
 boss = False
+rest = False
+drink = False
+pray = False
+forge = False
+trade = False
 
 HP = 50
 HPMAX = 50
@@ -20,12 +26,14 @@ gold = 0
 x = 0
 y = 0
 
-        #  x = 0       x = 1       x = 2       x = 3       x = 4       x = 5         x = 6
-map = [["plains",   "plains",   "plains",   "plains",   "forest", "mountain",       "cave"],    # y = 0
-       ["forest",   "forest",   "forest",   "forest",   "forest",    "hills",   "mountain"],    # y = 1
-       ["forest",   "fields",   "bridge",   "plains",    "hills",   "forest",      "hills"],    # y = 2
-       ["plains",     "shop",     "town",    "mayor",   "plains",    "hills",       "shop"],    # y = 3
-       ["plains",   "fields",   "fields",   "plains",    "hills", "mountain",   "mountain"]]    # y = 4
+        #  x = 0       x = 1       x = 2       x = 3       x = 4       x = 5         x = 6       x = 7       x = 8
+map = [["plains",   "plains",   "plains",   "plains",   "forest", "mountain",       "cave",   "mountain",   "plains"],    # y = 0
+       ["forest",   "forest",   "forest",   "forest",   "forest",    "hills",   "mountain",     "inn",     "forest"],    # y = 1
+       ["forest",   "fields",   "bridge",   "plains",    "hills",   "forest",      "hills",   "tavern",    "plains"],    # y = 2
+       ["plains",     "shop",     "town",    "mayor",   "plains",    "hills",       "shop",   "temple",    "fields"],    # y = 3
+       ["plains",   "fields",   "fields",   "plains",    "hills", "mountain",   "mountain", "blacksmith", "plains"],    # y = 4
+       ["forest",   "market",   "plains",   "forest",   "forest",   "plains",      "hills",    "plains",   "forest"],    # y = 5
+       ["plains",   "plains",   "forest",   "plains",   "forest",   "forest",     "plains",    "forest",   "plains"]]    # y = 6
 
 y_len = len(map)-1
 x_len = len(map[0])-1
@@ -60,11 +68,25 @@ biom = {
         "e": True},
     "hills": {
         "t": "HILLS",
-        "e": True,
-    }
+        "e": True},
+    "inn": {
+        "t": "INN",
+        "e": False},
+    "tavern": {
+        "t": "TAVERN",
+        "e": False},
+    "temple": {
+        "t": "TEMPLE",
+        "e": False},
+    "blacksmith": {
+        "t": "BLACKSMITH",
+        "e": False},
+    "market": {
+        "t": "MARKET",
+        "e": False}
 }
 
-e_list = ["Goblin", "Orc", "Slime"]
+e_list = ["Goblin", "Orc", "Slime", "Turkey"]
 
 mobs = {
     "Goblin": {
@@ -86,6 +108,11 @@ mobs = {
         "hp": 100,
         "at": 8,
         "go": 100
+    },
+    "Turkey": {
+        "hp": 22,
+        "at": 3,
+        "go": 16
     }
 }
 
@@ -146,7 +173,10 @@ def art1():
     """)
 
 def clear():
-    print(100 * "\n")
+    if os.name == 'nt':
+        os.system('cls')
+    else:
+        print(100 * "\n")
 
 
 def draw():
@@ -186,13 +216,24 @@ def battle():
     global fight, play, run, HP, pot, elix, gold, boss
 
     if not boss:
-        enemy = random.choice(e_list)
+        rand = random.randint(1, 50)
+        if rand <= 2:
+            enemy = "Turkey"
+        else:
+            enemy = random.choice(["Goblin", "Orc", "Slime"])
     else:
         enemy = "Dragon"
     hp = mobs[enemy]["hp"]
     hpmax = hp
     atk = mobs[enemy]["at"]
     g = mobs[enemy]["go"]
+    
+    turkey_quotes = ["Gobble gobble... existence is suffering...",
+                    "Gobble... why do we fight when we all return to dust?",
+                    "Gobble gobble... your soul aches with the weight of futility...",
+                    "Gobble... is this violence truly necessary?",
+                    "Gobble gobble... we are all just feathers chasing after the wind...",
+                    "Gobble gobble... If you aren't fed with Love from a spoon, you'll learn to lick it off of knives..."]
 
     while fight:
         clear()
@@ -218,7 +259,11 @@ def battle():
             print(name + " dealt " + str(ATK) + " damage to the " + enemy + ".")
             if hp > 0:
                 HP -= atk
-                print(enemy + " dealt " + str(atk) + " damage to " + name + ".")
+                if enemy == "Turkey":
+                    print("Turkey: " + random.choice(turkey_quotes))
+                    print("The Turkey's words wound your very soul for " + str(atk) + " damage.")
+                else:
+                    print(enemy + " dealt " + str(atk) + " damage to " + name + ".")
             input("> ")
 
         elif choice == "2":
@@ -226,7 +271,11 @@ def battle():
                 pot -= 1
                 heal(30)
                 HP -= atk
-                print(enemy + " dealt " + str(atk) + " damage to " + name + ".")
+                if enemy == "Turkey":
+                    print("Turkey: " + random.choice(turkey_quotes))
+                    print("The Turkey's words wound your very soul for " + str(atk) + " damage.")
+                else:
+                    print(enemy + " dealt " + str(atk) + " damage to " + name + ".")
             else:
                 print("No potions!")
             input("> ")
@@ -236,7 +285,11 @@ def battle():
                 elix -= 1
                 heal(50)
                 HP -= atk
-                print(enemy + " dealt " + str(atk) + " damage to " + name + ".")
+                if enemy == "Turkey":
+                    print("Turkey: " + random.choice(turkey_quotes))
+                    print("The Turkey's words wound your very soul for " + str(atk) + " damage.")
+                else:
+                    print(enemy + " dealt " + str(atk) + " damage to " + name + ".")
             else:
                 print("No elixirs!")
             input("> ")
@@ -251,7 +304,12 @@ def battle():
             input("> ")
 
         if hp <= 0:
-            print(name + " defeated the " + enemy + "!")
+            if enemy == "Turkey":
+                print("The Turkey collapses, whispering...")
+                print("Turkey: Gobble gobble... perhaps... this is the meaning I sought...")
+                print("You feel strangely enlightened yet hollow.")
+            else:
+                print(name + " defeated the " + enemy + "!")
             draw()
             fight = False
             gold += g
@@ -274,6 +332,8 @@ def battle():
                 play = False
                 run = False
             input("> ")
+            if enemy != "Dragon":
+                clear()
 
 
 def shop():
@@ -370,6 +430,196 @@ def cave():
                 battle()
         elif choice == "2":
             boss = False
+
+
+def inn():
+    global rest, gold, HP
+
+    while rest:
+        clear()
+        draw()
+        print("Welcome to the inn, weary traveler!")
+        draw()
+        print("GOLD: " + str(gold))
+        print("HP: " + str(HP) + "/" + str(HPMAX))
+        draw()
+        print("1 - REST (FULL HEAL) - 15 GOLD")
+        print("2 - NAP (25HP) - 8 GOLD")
+        print("3 - LEAVE")
+        draw()
+
+        choice = input("# ")
+
+        if choice == "1":
+            if gold >= 15:
+                gold -= 15
+                heal(HPMAX)
+                print("You feel completely refreshed!")
+            else:
+                print("Not enough gold!")
+            input("> ")
+        elif choice == "2":
+            if gold >= 8:
+                gold -= 8
+                heal(25)
+                print("You feel a bit better!")
+            else:
+                print("Not enough gold!")
+            input("> ")
+        elif choice == "3":
+            rest = False
+
+
+def tavern():
+    global drink, gold
+
+    while drink:
+        clear()
+        draw()
+        print("The tavern is bustling with chatter...")
+        draw()
+        print("GOLD: " + str(gold))
+        draw()
+        print("1 - BUY ALE (HEAR RUMORS) - 3 GOLD")
+        print("2 - LEAVE")
+        draw()
+
+        choice = input("# ")
+
+        if choice == "1":
+            if gold >= 3:
+                gold -= 3
+                tips = ["The dragon sleeps during thunderstorms...", 
+                       "Orcs fear fire but love shiny things...",
+                       "The mayor has a secret stash of gold...",
+                       "Mountain caves hold ancient treasures...",
+                       "Slimes multiply when cut in half..."]
+                print("Bartender: " + random.choice(tips))
+            else:
+                print("Not enough gold!")
+            input("> ")
+        elif choice == "2":
+            drink = False
+
+
+def temple():
+    global pray, gold, HPMAX
+
+    while pray:
+        clear()
+        draw()
+        print("You stand before the holy altar...")
+        draw()
+        print("GOLD: " + str(gold))
+        print("MAX HP: " + str(HPMAX))
+        draw()
+        print("1 - DONATE (+5 MAX HP) - 20 GOLD")
+        print("2 - PRAY (FREE HEAL)")
+        print("3 - LEAVE")
+        draw()
+
+        choice = input("# ")
+
+        if choice == "1":
+            if gold >= 20:
+                gold -= 20
+                HPMAX += 5
+                print("The gods smile upon you!")
+            else:
+                print("The gods require more gold...")
+            input("> ")
+        elif choice == "2":
+            heal(15)
+            print("You feel blessed!")
+            input("> ")
+        elif choice == "3":
+            pray = False
+
+
+def blacksmith():
+    global forge, gold, ATK
+
+    while forge:
+        clear()
+        draw()
+        print("The blacksmith hammers away at red hot metal...")
+        draw()
+        print("GOLD: " + str(gold))
+        print("ATK: " + str(ATK))
+        draw()
+        print("1 - SHARPEN WEAPON (+1 ATK) - 7 GOLD")
+        print("2 - FORGE BLADE (+3 ATK) - 25 GOLD")
+        print("3 - LEAVE")
+        draw()
+
+        choice = input("# ")
+
+        if choice == "1":
+            if gold >= 7:
+                gold -= 7
+                ATK += 1
+                print("Your weapon gleams with deadly sharpness!")
+            else:
+                print("Not enough gold!")
+            input("> ")
+        elif choice == "2":
+            if gold >= 25:
+                gold -= 25
+                ATK += 3
+                print("A masterwork blade is born!")
+            else:
+                print("Not enough gold!")
+            input("> ")
+        elif choice == "3":
+            forge = False
+
+
+def market():
+    global trade, gold, pot, elix
+
+    while trade:
+        clear()
+        draw()
+        print("Welcome to the market!")
+        draw()
+        print("GOLD: " + str(gold))
+        print("POTIONS: " + str(pot))
+        print("ELIXIRS: " + str(elix))
+        draw()
+        print("1 - BUY MEGA POTION (50HP) - 12 GOLD")
+        print("2 - BUY POTION BUNDLE (3 POTIONS) - 12 GOLD")
+        print("3 - SELL POTIONS - 3 GOLD EACH")
+        print("4 - LEAVE")
+        draw()
+
+        choice = input("# ")
+
+        if choice == "1":
+            if gold >= 12:
+                gold -= 12
+                pot += 1
+                print("You bought a powerful healing potion!")
+            else:
+                print("Not enough gold!")
+            input("> ")
+        elif choice == "2":
+            if gold >= 12:
+                gold -= 12
+                pot += 3
+                print("A great deal!")
+            else:
+                print("Not enough gold!")
+            input("> ")
+        elif choice == "3":
+            if pot > 0:
+                pot -= 1
+                gold += 3
+                print("Sold!")
+            else:
+                print("No potions to sell!")
+            input("> ")
+        elif choice == "4":
+            trade = False
 
 
 
@@ -473,7 +723,7 @@ while run:
                 print("5 - USE POTION (30HP)")
             if elix > 0:
                 print("6 - USE ELIXIR (50HP)")
-            if map[y][x] == "shop" or map[y][x] == "mayor" or map[y][x] == "cave":
+            if map[y][x] == "shop" or map[y][x] == "mayor" or map[y][x] == "cave" or map[y][x] == "inn" or map[y][x] == "tavern" or map[y][x] == "temple" or map[y][x] == "blacksmith" or map[y][x] == "market":
                 print("7 - ENTER")
             draw()
 
@@ -525,5 +775,20 @@ while run:
                 if map[y][x] == "cave":
                     boss = True
                     cave()
+                if map[y][x] == "inn":
+                    rest = True
+                    inn()
+                if map[y][x] == "tavern":
+                    drink = True
+                    tavern()
+                if map[y][x] == "temple":
+                    pray = True
+                    temple()
+                if map[y][x] == "blacksmith":
+                    forge = True
+                    blacksmith()
+                if map[y][x] == "market":
+                    trade = True
+                    market()
             else:
                 standing = True
