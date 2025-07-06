@@ -1,5 +1,16 @@
 import os
 import random
+import time
+
+def typewriter(text, delay=0.03):
+    """Print text with typewriter effect for dialogue"""
+    import sys
+    
+    # Simple version for all platforms - just show the text with typing effect
+    for char in text:
+        print(char, end='', flush=True)
+        time.sleep(delay)
+    print()  # Add newline at the end
 
 run = True
 menu = True
@@ -16,6 +27,8 @@ drink = False
 pray = False
 forge = False
 trade = False
+learned_prayer = False
+inventory = False
 
 HP = 50
 HPMAX = 50
@@ -23,6 +36,7 @@ ATK = 3
 pot = 1
 elix = 0
 gold = 0
+talon = 0
 x = 0
 y = 0
 
@@ -49,7 +63,7 @@ biom = {
         "t": "FIELDS",
         "e": False},
     "bridge": {
-        "t": "BRIGE",
+        "t": "BRIDGE",
         "e": True},
     "town": {
         "t": "TOWN CENTRE",
@@ -191,9 +205,11 @@ def save():
         str(pot),
         str(elix),
         str(gold),
+        str(talon),
         str(x),
         str(y),
-        str(key)
+        str(key),
+        str(learned_prayer)
     ]
 
     file = open("load.txt", "w")
@@ -213,10 +229,10 @@ def heal(amount):
 
 
 def battle():
-    global fight, play, run, HP, pot, elix, gold, boss
+    global fight, play, run, HP, pot, elix, gold, boss, talon
 
     if not boss:
-        rand = random.randint(1, 50)
+        rand = random.randint(1, 100)
         if rand <= 2:
             enemy = "Turkey"
         else:
@@ -250,6 +266,8 @@ def battle():
             print("2 - USE POTION (30HP)")
         if elix > 0:
             print("3 - USE ELIXIR (50HP)")
+        if learned_prayer:
+            print("4 - PRAY")
         draw()
 
         choice = input("# ")
@@ -260,7 +278,7 @@ def battle():
             if hp > 0:
                 HP -= atk
                 if enemy == "Turkey":
-                    print("Turkey: " + random.choice(turkey_quotes))
+                    typewriter("Turkey: " + random.choice(turkey_quotes))
                     print("The Turkey's words wound your very soul for " + str(atk) + " damage.")
                 else:
                     print(enemy + " dealt " + str(atk) + " damage to " + name + ".")
@@ -272,7 +290,7 @@ def battle():
                 heal(30)
                 HP -= atk
                 if enemy == "Turkey":
-                    print("Turkey: " + random.choice(turkey_quotes))
+                    typewriter("Turkey: " + random.choice(turkey_quotes))
                     print("The Turkey's words wound your very soul for " + str(atk) + " damage.")
                 else:
                     print(enemy + " dealt " + str(atk) + " damage to " + name + ".")
@@ -286,12 +304,41 @@ def battle():
                 heal(50)
                 HP -= atk
                 if enemy == "Turkey":
-                    print("Turkey: " + random.choice(turkey_quotes))
+                    typewriter("Turkey: " + random.choice(turkey_quotes))
                     print("The Turkey's words wound your very soul for " + str(atk) + " damage.")
                 else:
                     print(enemy + " dealt " + str(atk) + " damage to " + name + ".")
             else:
                 print("No elixirs!")
+            input("> ")
+
+        elif choice == "4":
+            if learned_prayer:
+                print("You kneel and pray for divine intervention...")
+                prayer_result = random.randint(1, 100)
+                if prayer_result <= 25:
+                    heal_amount = random.randint(10, 25)
+                    heal(heal_amount)
+                    print("A warm light surrounds you!")
+                elif prayer_result <= 50:
+                    damage = random.randint(15, 30)
+                    hp -= damage
+                    print("Lightning strikes the " + enemy + " for " + str(damage) + " damage!")
+                elif prayer_result <= 75:
+                    pot += 1
+                    print("A potion falls from the heavens!")
+                elif prayer_result <= 90:
+                    pot += 1
+                    print("A mega potion materializes before you!")
+                else:
+                    print("Your prayers echo in silence...")
+                
+                HP -= atk
+                if enemy == "Turkey":
+                    typewriter("Turkey: " + random.choice(turkey_quotes))
+                    print("The Turkey's words wound your very soul for " + str(atk) + " damage.")
+                else:
+                    print(enemy + " dealt " + str(atk) + " damage to " + name + ".")
             input("> ")
 
         if HP <= 0:
@@ -306,7 +353,7 @@ def battle():
         if hp <= 0:
             if enemy == "Turkey":
                 print("The Turkey collapses, whispering...")
-                print("Turkey: Gobble gobble... perhaps... this is the meaning I sought...")
+                typewriter("Turkey: Gobble gobble... perhaps... this is the meaning I sought...")
                 print("You feel strangely enlightened yet hollow.")
             else:
                 print(name + " defeated the " + enemy + "!")
@@ -314,6 +361,9 @@ def battle():
             fight = False
             gold += g
             print("You've found " + str(g) + " gold!")
+            if enemy == "Orc" and random.randint(0, 100) < 25:
+                talon += 1
+                print("You've found an Orc Talon! It glows with mystical energy...")
             if random.randint(0, 100) < 30:
                 pot += 1
                 print("You've found a potion!")
@@ -322,10 +372,10 @@ def battle():
                 draw()
                 art1()
                 print("=======================================")
-                print("=        CONGRATULATIONS!!!           =")
-                print("==You've just beaten this awesome RPG!=")
+                typewriter("=        CONGRATULATIONS!!!           =")
+                typewriter("==You've just beaten this awesome RPG!=")
                 print("=======================================")
-                print("==Please give me a star on GitHub======")
+                typewriter("==Please give me a star on GitHub======")
                 print("=======================================")
                 draw()
                 boss = False
@@ -391,12 +441,12 @@ def mayor():
     while speak:
         clear()
         draw()
-        print("Hello there, " + name + "!")
+        typewriter("Hello there, " + name + "!")
         if ATK < 10:
-            print("You're not strong enough to face the dragon yet! Keep practicing and come back later!")
+            typewriter("You're not strong enough to face the dragon yet! Keep practicing and come back later!")
             key = False
         else:
-            print("You might want to take on the dragon now! Take this key but be careful with the beast!")
+            typewriter("You might want to take on the dragon now! Take this key but be careful with the beast!")
             key = True
 
         draw()
@@ -494,7 +544,7 @@ def tavern():
                        "The mayor has a secret stash of gold...",
                        "Mountain caves hold ancient treasures...",
                        "Slimes multiply when cut in half..."]
-                print("Bartender: " + random.choice(tips))
+                typewriter("Bartender: " + random.choice(tips))
             else:
                 print("Not enough gold!")
             input("> ")
@@ -503,7 +553,7 @@ def tavern():
 
 
 def temple():
-    global pray, gold, HPMAX
+    global pray, gold, HPMAX, learned_prayer
 
     while pray:
         clear()
@@ -513,9 +563,11 @@ def temple():
         print("GOLD: " + str(gold))
         print("MAX HP: " + str(HPMAX))
         draw()
-        print("1 - DONATE (+5 MAX HP) - 20 GOLD")
+        print("1 - RECEIVE BLESSINGS (+5 MAX HP) - 20 GOLD")
         print("2 - PRAY (FREE HEAL)")
-        print("3 - LEAVE")
+        print("3 - PRIEST")
+        print("4 - LOOK AROUND")
+        print("5 - LEAVE")
         draw()
 
         choice = input("# ")
@@ -524,15 +576,30 @@ def temple():
             if gold >= 20:
                 gold -= 20
                 HPMAX += 5
-                print("The gods smile upon you!")
+                typewriter("You receive blessings and feel strengthened!")
             else:
-                print("The gods require more gold...")
+                print("You lack gold to tithe...")
             input("> ")
         elif choice == "2":
             heal(15)
-            print("You feel blessed!")
+            typewriter("You feel blessed!")
             input("> ")
         elif choice == "3":
+            if not learned_prayer:
+                typewriter("Priest: My child, would you like to learn the sacred art of prayer?")
+                typewriter("With prayer, you can call upon divine intervention during battle.")
+                typewriter("Priest: I will teach you this holy skill for free.")
+                learned_prayer = True
+                typewriter("You have learned the ability to pray in battle!")
+            else:
+                typewriter("Priest: Go forth, my child, and may God be with you always.")
+            input("> ")
+        elif choice == "4":
+            typewriter("You see faithful worshippers kneeling in prayer.")
+            typewriter("They praise Jesus Christ for all that he's done.")
+            typewriter("The atmosphere is filled with peace and devotion.")
+            input("> ")
+        elif choice == "5":
             pray = False
 
 
@@ -622,6 +689,75 @@ def market():
             trade = False
 
 
+def view_inventory():
+    global inventory, x, y, talon
+
+    while inventory:
+        clear()
+        draw()
+        print("INVENTORY")
+        draw()
+        print("CHARACTER:")
+        print("  NAME: " + name)
+        print("  HP: " + str(HP) + "/" + str(HPMAX))
+        print("  ATK: " + str(ATK))
+        draw()
+        print("ITEMS:")
+        print("  GOLD: " + str(gold))
+        print("  POTIONS: " + str(pot))
+        print("  ELIXIRS: " + str(elix))
+        print("  ORC TALONS: " + str(talon))
+        draw()
+        print("QUEST ITEMS:")
+        if key:
+            print("  DRAGON KEY: Yes")
+        else:
+            print("  DRAGON KEY: No")
+        draw()
+        print("ABILITIES:")
+        if learned_prayer:
+            print("  PRAYER: Learned")
+        else:
+            print("  PRAYER: Not learned")
+        draw()
+        print("LOCATION:")
+        print("  CURRENT: " + biom[map[y][x]]["t"])
+        print("  COORD: " + str(x) + ", " + str(y))
+        draw()
+        print("1 - CLOSE INVENTORY")
+        if talon > 0:
+            print("2 - USE ORC TALON (FAST TRAVEL)")
+        draw()
+
+        choice = input("# ")
+
+        if choice == "1":
+            inventory = False
+        elif choice == "2":
+            if talon > 0:
+                print("The Orc Talon glows with mystical energy...")
+                print("You can fast travel to any coordinates on the map!")
+                print("Map dimensions: X (0-" + str(x_len) + "), Y (0-" + str(y_len) + ")")
+                try:
+                    new_x = int(input("Enter X coordinate: "))
+                    new_y = int(input("Enter Y coordinate: "))
+                    if 0 <= new_x <= x_len and 0 <= new_y <= y_len:
+                        x = new_x
+                        y = new_y
+                        talon -= 1
+                        print("The talon crumbles to dust as mystical energy transports you!")
+                        print("You have arrived at: " + biom[map[y][x]]["t"])
+                        inventory = False
+                    else:
+                        print("Invalid coordinates! The talon remains unused.")
+                except ValueError:
+                    print("Invalid input! The talon remains unused.")
+                input("> ")
+            else:
+                print("You don't have any Orc Talons!")
+                input("> ")
+
+
 
 while run:
     while menu:
@@ -662,16 +798,18 @@ while run:
             try:
                 f = open("load.txt", "r")
                 load_list = f.readlines()
-                if len(load_list) == 9:
+                if len(load_list) == 11:
                     name = load_list[0][:-1]
                     HP = int(load_list[1][:-1])
                     ATK = int(load_list[2][:-1])
                     pot = int(load_list[3][:-1])
                     elix = int(load_list[4][:-1])
                     gold = int(load_list[5][:-1])
-                    x = int(load_list[6][:-1])
-                    y = int(load_list[7][:-1])
-                    key = bool(load_list[8][:-1])
+                    talon = int(load_list[6][:-1])
+                    x = int(load_list[7][:-1])
+                    y = int(load_list[8][:-1])
+                    key = load_list[9][:-1] == "True"
+                    learned_prayer = load_list[10][:-1] == "True"
                     clear()
                     print("Welcome back, " + name + "!")
                     input("> ")
@@ -725,6 +863,7 @@ while run:
                 print("6 - USE ELIXIR (50HP)")
             if map[y][x] == "shop" or map[y][x] == "mayor" or map[y][x] == "cave" or map[y][x] == "inn" or map[y][x] == "tavern" or map[y][x] == "temple" or map[y][x] == "blacksmith" or map[y][x] == "market":
                 print("7 - ENTER")
+            print("8 - INVENTORY")
             draw()
 
             dest = input("# ")
@@ -790,5 +929,8 @@ while run:
                 if map[y][x] == "market":
                     trade = True
                     market()
+            elif dest == "8":
+                inventory = True
+                view_inventory()
             else:
                 standing = True
